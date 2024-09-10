@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-hello-world
+  namespace: nginx-hello-world
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-hello-world
+  template:
+    metadata:
+      labels:
+        app: nginx-hello-world
+    spec:
+      initContainers:
+      - name: init-nginx-html
+        image: busybox
+        command: ['sh', '-c', 'cp /mnt/index.template /usr/share/nginx/html/index.html && sed -i "s/{{NODE_NAME}}/$NODE_NAME/g" /usr/share/nginx/html/index.html']
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: nginx-html
+          mountPath: /mnt
+        - name: nginx-html-runtime
+          mountPath: /usr/share/nginx/html
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-html-runtime
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nginx-html
+        configMap:
+          name: nginx-html
+      - name: nginx-html-runtime
+        emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-html
+  namespace: nginx-hello-world
+data:
+  index.template: |
+    <html>
+    <head>
+        <title>Hello World</title>
+    </head>
+    <body>
+        <h1>Hello, Kubernetes!</h1>
+        <p>You are viewing content from the node: {{NODE_NAME}}</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Rube_Goldberg%27s_%22Self-Operating_Napkin%22_%28cropped%29.gif" />
+    </body>
+    </html>

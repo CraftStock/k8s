@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-hello-world-ingress
+  namespace: nginx-hello-world
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: hello.firefleeb.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-hello-world-service
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - hello.firefleeb.com
+    secretName: hello-irefleeb-com-tls
