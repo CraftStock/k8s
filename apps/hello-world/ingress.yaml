@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: hello.firefleeb.com
+  - host: hello2.firefleeb.com
     http:
       paths:
       - path: /
@@ -21,5 +21,5 @@ spec:
               number: 80
   tls:
   - hosts:
-    - hello.firefleeb.com
+    - hello2.firefleeb.com
     secretName: hello-irefleeb-com-tls
